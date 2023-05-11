@@ -1,24 +1,28 @@
 # Confluent Cloud Audit Logs Analysis
 
 This repo provides bash shell scripts that analyze Audit Log entries for your Confluent Cloud organization.
-It consists of three shell scripts and a sqlite executable (for MacOS).
+It runs on MacOS (not on unfortunately)
+It consists of three shell scripts and a sqlite executable.
 The shell scripts are interactive - they require responses. No arguments are provided when running the scripts.
 
 ## Pre-requisites
-Access to Confluent Cloud audit logs requires the OrganizationAdmin RBAC role.
+Access to Confluent Cloud audit logs requires the "OrganizationAdmin" RBAC role.
 See the Confluent Cloud documentation for setup of the cli before running the scripts in this repo:
 https://docs.confluent.io/cloud/current/monitoring/audit-logging/configure.html#consume-with-confluent-cli
-The scripts in this repo require a bash shell, ~hey have been tested on MacOS.
+The scripts in this repo require a bash shell and have been tested on MacOS.
 
 ## How it works
 Run 01_download_audit_log_entries.sh to download audit log entries for your Cloud Organization. These may number in millions of entries: it may take 15-30 minutes to complete.
+
 Run 02_analyze_cc_audit_entries.sh to load the latest downloaded audit log entries into a local sqlite database and run a number of queries to summarize the audit log entries.
+
 Run 03_cleanup to delete the subdirectories and their contents (data, work). They will be automatically recreated for the next download and analyze.
-The query results are written into the reports sub directory using unique filenames.
+
+The query results are written into the reports sub directory using unique filenames for each execution (so that you can diff the files)
 
 ## How to use this
 Audit Logs provide a 10,000 foot view of client activity (producers and consiumers) for your Confluent Cloud organization.
-If clients are behaving in an unexpected way (such as reconnecting to rapidly) then this could cause an outage.
+If clients are behaving in an unexpected way (such as reconnecting too rapidly) then this could cause instability.
 Audit Log entries are generally numerous, so a first round of analysis is to aggregate and count: by prinipal (= username); by method; etc.
 If any of the counts appear abnormally high, investigate the clients (producers and consumers) that use the names principal to deterine why.
 For example if the kafka.Authentication events for a user-principal are 3600 per hour, then check if clients using this user-principal are expected to reconnect to Confluent Cloud each second.
